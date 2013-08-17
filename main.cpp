@@ -5,3 +5,8 @@
  *      Author: keym
  */
 
+int main()
+{
+
+	return 0;
+}

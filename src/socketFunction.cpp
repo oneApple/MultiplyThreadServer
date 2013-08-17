@@ -8,12 +8,9 @@
 #include<stdlib.h>
 #include</usr/src/linux-headers-3.2.0-51/include/linux/socket.h>
 #include<fcntl.h>
-#include<errno.h>
-#include<unistd.h>
-#include<stdio.h>
-#include<exception>
 
 #include"errorHandle.h"
+#include"magicNum.h"
 
 void ListenAndSetBlockNum(int fd, int backlog)
 {

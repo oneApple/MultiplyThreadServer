@@ -22,7 +22,13 @@ const ssize_t SUCCESS = 0;
 const ssize_t FAILED = -1;
 
 namespace epollhandle{
-const ssize_t MAXNUMFD = 2048;
+const size_t MAXNUMFD = 2048;
+const ssize_t MAXLISTENT = 10;
+};
+
+namespace configfile{
+enum keylen{ KEYVALLEN = 100};
+const char * const cfgpath = "../cfg.data";
 };
 
 };

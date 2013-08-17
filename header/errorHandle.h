@@ -12,8 +12,8 @@
 extern "C" {
 #endif
 
-int error_fatal(char *msg);
-int error_normal(char *msg);
+void error_fatal(const char *msg);
+void error_normal(const char *msg);
 
 #ifdef __cplusplus
 }

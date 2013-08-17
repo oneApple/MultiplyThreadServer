@@ -9,9 +9,15 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-int error_fatal(char *msg)
+void error_fatal(const char *msg)
 {
 	printf("fatal_error:");
 	perror(msg);
 	exit(0);
+}
+
+void error_normal(const char *msg)
+{
+	printf("fatal_error:");
+	perror(msg);
 }

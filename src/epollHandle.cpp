@@ -5,16 +5,18 @@
  *      Author: keym
  */
 
-#include</usr/include/x86_64-linux-gnu/sys/resource.h>
-#include</usr/include/x86_64-linux-gnu/sys/socket.h>
-#include<unistd.h>
-#include<stdio.h>
+//#include</usr/include/x86_64-linux-gnu/sys/resource.h>
+//#include</usr/include/x86_64-linux-gnu/sys/socket.h>
+#include</usr/src/linux-headers-3.2.0-51/include/linux/socket.h>
+#include</usr/include/i386-linux-gnu/sys/resource.h>
 
+#include"epollHandle.h"
+
+#include"socketFunction.h"
 #include"errorHandle.h"
+#include"commonStruct.h"
 
-static bool flag = true;
-
-void handleEpollSocket::getEpollFdlimit()
+void epollHandle::getEpollFdlimit()
 {
 	rlimit limit;
 	getrlimit(RLIMIT_NOFILE,&limit);
@@ -26,7 +28,7 @@ void handleEpollSocket::getEpollFdlimit()
 	//描述符数目不能太大，有限制
 }
 
-void handleEpollSocket::createEpollfd()
+void epollHandle::createEpollfd()
 {
 	if((this->_epfd=epoll_create(this->_maxNumOfEpollfd))<0)
 	{
@@ -34,63 +36,48 @@ void handleEpollSocket::createEpollfd()
 	}
 }
 
-void handleEpollSocket::initializeEpoll()
+void epollHandle::initializeEpoll()
 {
 	getEpollFdlimit();
 	createEpollfd();
 }
 
-void handleEpollSocket::addEpollSocket(int fd)
+void epollHandle::addEpollSocket(int fd)
 {
-	if(SetSocketNonblocking(fd) == magicnum::FAILIED)
-	{
-		perror("");
-	}
+//	if(SetSocketNonblocking(fd) == magicnum::FAILED)
+//	{
+//		error_normal("handleEpollSocket::addEpollSocket");
+//		return;
+//	}
 	struct epoll_event ev;
 	ev.data.fd=fd;
-	//ev.events=EPOLLIN|EPOLLET;
 	ev.events=EPOLLIN;
 	epoll_ctl(_epfd,EPOLL_CTL_ADD,fd,&ev);
 }
 
-void handleEpollSocket::delEpollSocket(int fd)
+void epollHandle::delEpollSocket(int fd)
 {
 	close(fd);
 	epoll_ctl(_epfd,EPOLL_CTL_DEL,fd,NULL);
 }
 
-void handleEpollSocket::modEpollSocket(int fd,bool rTow)
+void epollHandle::modEpollSocket(int fd,enumEpollEvent event = WEVENT)
 {
 	struct epoll_event ev;
 	ev.data.fd=fd;
-	ev.events=EPOLLIN;
-	//ev.events=EPOLLIN|EPOLLET;
-	if(rTow)
+	switch(event)
 	{
-		ev.events=EPOLLOUT|EPOLLET;
+	case WEVENT:
+	{
+		ev.events=EPOLLOUT;
+		break;
+	}
+	case REVENT:
+	{
+		ev.events=EPOLLIN;
+		break;
+	}
 	}
 	epoll_ctl(_epfd,EPOLL_CTL_MOD,fd,&ev);
 }
 
-void handleEpollSocket::packData(void *pdata)
-{
-	this->_ddataToSend.push_back((dataInfo*)pdata);
-}
-
-void handleEpollSocket::sendData(int sendfd)
-{
-	dataInfo *pdataInfo = this->_ddataToSend[0];
-	this->_ddataToSend.pop_front();
-	if(RepeatSend(sendfd,pdataInfo->_pdata,pdataInfo->_size) == magicnum::FAILIED)
-	{
-		if(flag)
-		{
-			flag = false;
-			perror("handleEpollSocket::sendData");
-		}
-	}
-	//delete []pdataInfo->_pdata;
-	MemPool::getInstance()->freeMem(pdataInfo->_pdata);
-	delete pdataInfo;
-	//fixmemorypool<dataInfo>::getInstance()->mem_pool_release(pdataInfo);
-}
