@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 int error_fatal(char *msg);
+int error_normal(char *msg);
 
 #ifdef __cplusplus
 }

@@ -20,6 +20,11 @@
 namespace magicnum{
 const ssize_t SUCCESS = 0;
 const ssize_t FAILED = -1;
+
+namespace epollhandle{
+const ssize_t MAXNUMFD = 2048;
+};
+
 };
 
 #endif

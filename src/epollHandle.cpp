@@ -7,27 +7,22 @@
 
 #include</usr/include/x86_64-linux-gnu/sys/resource.h>
 #include</usr/include/x86_64-linux-gnu/sys/socket.h>
-
 #include<unistd.h>
-#include<exception>
-#include<iostream>
 #include<stdio.h>
-#include"handleEpollSocket.h"
-#include"commondata/commontype.h"
-#include"mempool/fixmemorypool.h"
-#include"mempool/mempool.h"
+
+#include"errorHandle.h"
 
 static bool flag = true;
 
 void handleEpollSocket::getEpollFdlimit()
 {
 	rlimit limit;
-	getrlimit(RLIMIT_FSIZE,&limit);
-	if(limit.rlim_cur > magicnum::processmanage::MAXNUMPROCESS)
+	getrlimit(RLIMIT_NOFILE,&limit);
+
+	if(limit.rlim_cur > magicnum::epollhandle::MAXNUMFD)
 	{
 		this->_maxNumOfEpollfd = limit.rlim_cur;
 	}
-	this->_maxNumOfEpollfd = 2048;
 	//描述符数目不能太大，有限制
 }
 
@@ -35,9 +30,7 @@ void handleEpollSocket::createEpollfd()
 {
 	if((this->_epfd=epoll_create(this->_maxNumOfEpollfd))<0)
 	{
-		perror("epoll_create:");
-		std::cerr<<"parentProcess::initializeListenfdAndEpollfd:epoll_create"<<this->_maxNumOfEpollfd<<std::endl;
-		throw std::exception();
+		error_fatal("handleEpollSocket::createEpollfd");
 	}
 }
 
@@ -51,8 +44,7 @@ void handleEpollSocket::addEpollSocket(int fd)
 {
 	if(SetSocketNonblocking(fd) == magicnum::FAILIED)
 	{
-		std::cerr<<"parentProcess::initializeListenfdAndEpollfd:SetSocketNonblocking"<<std::endl;
-		throw std::exception();
+		perror("");
 	}
 	struct epoll_event ev;
 	ev.data.fd=fd;
