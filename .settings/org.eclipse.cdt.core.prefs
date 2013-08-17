@@ -1,0 +1,2 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1753444901=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<environment append\="true" appendContributed\="true">\n<variable delimiter\="\:" name\="CPLUS_INCLUDE_PATH" operation\="replace" value\="/usr/include/c++/4.6.3"/>\n</environment>\n

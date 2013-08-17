@@ -6,12 +6,14 @@
  */
 
 #include<stdlib.h>
-#include<sys/socket.h>
+#include</usr/src/linux-headers-3.2.0-51/include/linux/socket.h>
 #include<fcntl.h>
 #include<errno.h>
 #include<unistd.h>
 #include<stdio.h>
 #include<exception>
+
+#include"errorHandle.h"
 
 void ListenAndSetBlockNum(int fd, int backlog)
 {
@@ -22,23 +24,19 @@ void ListenAndSetBlockNum(int fd, int backlog)
 	}
 	if (listen(fd, backlog) < 0)
 	{
-		perror("listen error:");
-
+		error_fatal("socketFunction.c:ListenAndSetBlockNum");
 	}
-	return magicnum::SUCCESS;
 }
 
 int SetSocketNonblocking(int sock) //将文件描述符设置为非阻塞模式
 {
 	int opts;
 	if((opts=fcntl(sock,F_GETFL)<0)){
-		//perror("fcntl get");
-		return magicnum::FAILIED;
+		return CFAILED;
 	}
 	opts=opts|O_NONBLOCK;
 	if(fcntl(sock,F_SETFL,opts)<0){
-		//perror("fcntl set");
-		return magicnum::FAILIED;
+		return CFAILED;
 	}
-	return magicnum::SUCCESS;
+	return CFAILED;
 }

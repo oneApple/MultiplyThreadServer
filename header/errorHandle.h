@@ -12,8 +12,7 @@
 extern "C" {
 #endif
 
-int ListenAndSetBlockNum(int fd, int backlog) ;
-int SetSocketNonblocking(int sock) ; //将文件描述符设置为非阻塞模式
+int error_fatal(char *msg);
 
 #ifdef __cplusplus
 }

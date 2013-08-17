@@ -8,7 +8,7 @@
 #ifndef SOCKETFUNCTION_H_
 #define SOCKETFUNCTION_H_
 
-#include<sys/types.h>
+#include</usr/src/linux-headers-3.2.0-51/include/linux/types.h>
 
 #ifdef __cplusplus
 extern "C" {
