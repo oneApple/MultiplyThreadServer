@@ -6,7 +6,8 @@
  */
 
 #include<stdlib.h>
-#include</usr/src/linux-headers-3.2.0-51/include/linux/socket.h>
+//#include</usr/include/linux/socket.h>
+#include</usr/include/i386-linux-gnu/sys/socket.h>
 #include<fcntl.h>
 
 #include"errorHandle.h"

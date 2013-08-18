@@ -9,11 +9,14 @@
 #define MAGICNUM_H_
 
 //#define SYSPATH "/usr/src/linux-headers-3.2.0-51/include/linux"
-#include</usr/src/linux-headers-3.2.0-51/include/linux/types.h>
+#include</usr/include/linux/types.h>
 //魔法数一定不要直接使用
 
 #define CSUCCESS 0
 #define CFAILED -1
+
+enum keylen{ KEYVALLEN = 100};
+#define CFGPATH "../cfg.data"
 
 #ifdef __cplusplus
 
@@ -24,11 +27,6 @@ const ssize_t FAILED = -1;
 namespace epollhandle{
 const size_t MAXNUMFD = 2048;
 const ssize_t MAXLISTENT = 10;
-};
-
-namespace configfile{
-enum keylen{ KEYVALLEN = 100};
-const char * const cfgpath = "../cfg.data";
 };
 
 };

@@ -7,8 +7,10 @@
 
 //#include</usr/include/x86_64-linux-gnu/sys/resource.h>
 //#include</usr/include/x86_64-linux-gnu/sys/socket.h>
-#include</usr/src/linux-headers-3.2.0-51/include/linux/socket.h>
+
+#include</usr/include/i386-linux-gnu/sys/socket.h>
 #include</usr/include/i386-linux-gnu/sys/resource.h>
+#include<unistd.h>
 
 #include"epollHandle.h"
 
@@ -44,11 +46,11 @@ void epollHandle::initializeEpoll()
 
 void epollHandle::addEpollSocket(int fd)
 {
-//	if(SetSocketNonblocking(fd) == magicnum::FAILED)
-//	{
-//		error_normal("handleEpollSocket::addEpollSocket");
-//		return;
-//	}
+	if(SetSocketNonblocking(fd) == magicnum::FAILED)
+	{
+		error_normal("handleEpollSocket::addEpollSocket");
+		return;
+	}
 	struct epoll_event ev;
 	ev.data.fd=fd;
 	ev.events=EPOLLIN;

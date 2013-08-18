@@ -21,26 +21,26 @@ static char * l_trim(char * szOutput, const char *szInput)
 	assert(szInput != NULL);
 	assert(szOutput != NULL);
 	assert(szOutput != szInput);
-	for(NULL; *szInput != '\0' && isspace(*szInput); ++szInput){
+	for(; *szInput != '\0' && isspace(*szInput); ++szInput){
 		;
 	}
 	return strcpy(szOutput, szInput);
 }
 
 /*   删除右边的空格   */
-static char *r_trim(char *szOutput, const char *szInput)
-{
-	char *p = NULL;
-	assert(szInput != NULL);
-	assert(szOutput != NULL);
-	assert(szOutput != szInput);
-	strcpy(szOutput, szInput);
-	for(p = szOutput + strlen(szOutput) - 1; p >= szOutput && isspace(*p); --p){
-		;
-	}
-	*(++p) = '\0';
-	return szOutput;
-}
+//static char *r_trim(char *szOutput, const char *szInput)
+//{
+//	char *p = NULL;
+//	assert(szInput != NULL);
+//	assert(szOutput != NULL);
+//	assert(szOutput != szInput);
+//	strcpy(szOutput, szInput);
+//	for(p = szOutput + strlen(szOutput) - 1; p >= szOutput && isspace(*p); --p){
+//		;
+//	}
+//	*(++p) = '\0';
+//	return szOutput;
+//}
 
 /*   删除两边的空格   */
 static char * a_trim(char * szOutput, const char * szInput)
@@ -64,7 +64,7 @@ int GetProfileString(const char *AppName, const char *KeyName, char *KeyVal )
 	char buf_i[KEYVALLEN], buf_o[KEYVALLEN];
 	FILE *fp;
 	int found=0; /* 1 AppName 2 KeyName */
-	const char *profile = magicnum::configfile::cfgpath;
+	const char *profile = CFGPATH;
 	if( (fp=fopen( profile,"r" ))==NULL ){
 		printf( "openfile [%s] error [%s]\n",profile,strerror(errno) );
 		return(-1);
@@ -73,7 +73,7 @@ int GetProfileString(const char *AppName, const char *KeyName, char *KeyVal )
 	memset( appname, 0, sizeof(appname) );
 	sprintf( appname,"[%s]", AppName );
 
-	while( !feof(fp) && fgets( buf_i, magicnum::configfile::KEYVALLEN, fp )!=NULL ){
+	while( !feof(fp) && fgets( buf_i, KEYVALLEN, fp )!=NULL ){
 		l_trim(buf_o, buf_i);
 		if( strlen(buf_o) <= 0 )
 			continue;
@@ -124,3 +124,4 @@ int GetProfileString(const char *AppName, const char *KeyName, char *KeyVal )
 	else
 		return(-1);
 }
+

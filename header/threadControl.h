@@ -19,6 +19,7 @@ private:
 	void init_epoll();
 public:
 	threadControl():epollHandle(){}
+	void communicateFun();
 	void create_threadPool(int threadnum);
 };
 

@@ -8,15 +8,15 @@
 #ifndef CONFIGFILE_H_
 #define CONFIGFILE_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 int GetProfileString(const char *AppName,const char *KeyName,char *KeyVal );
 
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 
 
 #endif /* CONFIGFILE_H_ */
