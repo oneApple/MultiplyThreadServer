@@ -19,5 +19,10 @@ struct _msghead{
 };
 typedef struct _msghead msghead;
 
+struct _msgdata{
+	size_t datasize;
+	char* databuf;
+};
+typedef _msgdata msgdata;
 
 #endif /* COMMONSTRUCT_H_ */

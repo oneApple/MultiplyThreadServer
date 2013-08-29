@@ -95,7 +95,7 @@ void threadControl::communicateFun()
 				socklen_t clilen = sizeof(clientaddr);
 				if((connfd=accept(this->_netListenfd,(struct sockaddr*)&clientaddr,&clilen))<0)
 				{
-					if(errno == EINTR){continue;}
+					if(errno == EINTR || EAGAIN==errno){continue;}
 					error_fatal("threadControl::communicateFun::accept");
 				}
 				//不要加锁,惊群效率高
@@ -111,34 +111,41 @@ void threadControl::communicateFun()
 				memset(recvhead,0,magicnum::threadcontrol::MSGHEADSIZE);
 				if((readbytes=recv(_eventfd,recvhead,magicnum::threadcontrol::MSGHEADSIZE,0)) <= 0)
 				{
-					error_fatal("threadControl::communicateFun::recv");
+                    if(EAGAIN==errno) continue;
+                    if(readbytes == 0)epollHandle::delEpollSocket(_eventfd);
+					error_normal("threadControl::communicateFun::recv");
 					//关闭或出错
-					continue;
+					break;
 				}
 
 				msghead *phead = (msghead*)recvhead;
-
+				//printf("%lu type,size:%d,%d\n",pthread_self(),phead->msgtype,phead->msgbodysize);
 				char *pbody = (char*)malloc(phead->msgbodysize);
 				memset(pbody,0,phead->msgbodysize);
 				if((readbytes=recv(_eventfd,pbody,phead->msgbodysize,0)) <= 0)
 				{
-					error_fatal("threadControl::communicateFun::recv");
-					continue;
+					if(EAGAIN==errno) continue;
+					if(readbytes == 0)epollHandle::delEpollSocket(_eventfd);
+					error_normal("threadControl::communicateFun::recv");
+					break;
 				}
-				printf("%lu recv:%s,%d\n",pthread_self(),pbody,readbytes);
-				this->_cEpolloutData.packData(pbody);
+				sleep(5);
+				printf("%lu recv:%d,%d\n",pthread_self(),pbody,phead->msgbodysize);
+				this->_cEpolloutData.packData(_eventfd,phead->msgbodysize,pbody);
 				epollHandle::modEpollSocket(_eventfd,WEVENT);
+
 				//消息处理;
 			}
 			else if(events[i].events&EPOLLOUT)
 			{
-				//通知的顺序与投递的顺序相同
+				//在多线程同步的情况下，通知的顺序与投递的顺序不同
 
-				char *sendData = this->_cEpolloutData.DequeData();
+				msgdata *sendData = this->_cEpolloutData.DequeData(_eventfd);
 				if(sendData != 0)
 				{
-					printf("%lu send:%s\n",pthread_self(),sendData);
-					send(_eventfd,sendData,strlen(sendData),0);
+					printf("%lu send:%d\n",pthread_self(),sendData->databuf);
+					send(_eventfd,sendData->databuf,sendData->datasize,0);
+					free(sendData->databuf);
 					free(sendData);
 				}
 				epollHandle::modEpollSocket(_eventfd,REVENT);

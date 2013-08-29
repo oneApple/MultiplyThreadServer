@@ -8,16 +8,17 @@
 #ifndef DATACONTROL_H_
 #define DATACONTROL_H_
 
-#include<queue>
+#include<map>
 #include<pthread.h>
+#include"commonStruct.h"
 
 class epolloutDataControl{
 private:
-	std::queue<char*> _queData;
+	std::multimap<int,msgdata*> _mapData;
 	static pthread_mutex_t lock;
 public:
-	void packData(char *pdata);
-	char* DequeData();
+	void packData(int sockfd,int datasize,char *pdata);
+	msgdata* DequeData(int sockfd);
 };
 
 #endif /* DATACONTROL_H_ */
