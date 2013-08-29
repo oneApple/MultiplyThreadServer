@@ -15,7 +15,7 @@
 #define CFAILED -1
 
 enum keylen{ KEYVALLEN = 100};
-#define CFGPATH "../cfg.data"
+#define CFGPATH "./cfg.data"
 
 #ifdef __cplusplus
 

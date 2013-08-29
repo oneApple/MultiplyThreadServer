@@ -9,10 +9,12 @@
 #define THREADCONTROL_H_
 
 #include"epollHandle.h"
+#include"epolloutDataControl.h"
 
 class threadControl : public epollHandle{
 private:
 	int _netListenfd;
+	epolloutDataControl _cEpolloutData;
 private:
 	static void *thread_fun(void *arg);
 	void init_listenFd();

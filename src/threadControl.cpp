@@ -53,6 +53,7 @@ void threadControl::create_threadPool(int threadnum)
 {
 	int i;
 	pthread_t tid;
+	this->init_epoll();
 	for(i = 0;i < threadnum;++ i)
 	{
 		pthread_create(&tid,NULL,thread_fun,(void*)this);
@@ -71,7 +72,7 @@ void threadControl::communicateFun()
 {
 	struct epoll_event events[this->_maxNumOfEpollfd + 1];
 	int readbytes;
-	char readbuf[magicnum::threadcontrol::MSGHEADSIZE];
+	char recvhead[magicnum::threadcontrol::MSGHEADSIZE];
 	for(;;)
 	{
 		int nfds;
@@ -98,30 +99,48 @@ void threadControl::communicateFun()
 					error_fatal("threadControl::communicateFun::accept");
 				}
 				//不要加锁,惊群效率高
+				char addrbuf[50];
+				if(inet_ntop(AF_INET,&clientaddr.sin_addr,addrbuf,50)==NULL)
+					perror("inet_ntop");
+				printf("accept from:%s\n",addrbuf);
 				epollHandle::addEpollSocket(connfd);
 				continue;
 			}
 			else if(events[i].events&EPOLLIN)
 			{
-				memset(readbuf,0,magicnum::threadcontrol::MSGHEADSIZE);
-				if((readbytes=recv(_eventfd,readbuf,magicnum::threadcontrol::MSGHEADSIZE,0)) < 0)
+				memset(recvhead,0,magicnum::threadcontrol::MSGHEADSIZE);
+				if((readbytes=recv(_eventfd,recvhead,magicnum::threadcontrol::MSGHEADSIZE,0)) <= 0)
 				{
-					error_normal("threadControl::communicateFun::recv");
+					error_fatal("threadControl::communicateFun::recv");
 					//关闭或出错
 					continue;
 				}
 
-				msghead *phead = (msghead*)readbuf;
-				if((readbytes=recv(_eventfd,readbuf,phead->msgbodysize,0)) < 0)
+				msghead *phead = (msghead*)recvhead;
+
+				char *pbody = (char*)malloc(phead->msgbodysize);
+				memset(pbody,0,phead->msgbodysize);
+				if((readbytes=recv(_eventfd,pbody,phead->msgbodysize,0)) <= 0)
 				{
-					error_normal("threadControl::communicateFun::recv");
+					error_fatal("threadControl::communicateFun::recv");
 					continue;
 				}
+				printf("%lu recv:%s,%d\n",pthread_self(),pbody,readbytes);
+				this->_cEpolloutData.packData(pbody);
+				epollHandle::modEpollSocket(_eventfd,WEVENT);
 				//消息处理;
 			}
 			else if(events[i].events&EPOLLOUT)
 			{
 				//通知的顺序与投递的顺序相同
+
+				char *sendData = this->_cEpolloutData.DequeData();
+				if(sendData != 0)
+				{
+					printf("%lu send:%s\n",pthread_self(),sendData);
+					send(_eventfd,sendData,strlen(sendData),0);
+					free(sendData);
+				}
 				epollHandle::modEpollSocket(_eventfd,REVENT);
 			}
 			else if((events[i].events&EPOLLHUP)||(events[i].events&EPOLLERR))

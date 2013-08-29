@@ -36,5 +36,5 @@ int SetSocketNonblocking(int sock) //将文件描述符设置为非阻塞模式
 	if(fcntl(sock,F_SETFL,opts)<0){
 		return CFAILED;
 	}
-	return CFAILED;
+	return CSUCCESS;
 }

@@ -46,7 +46,7 @@ void epollHandle::initializeEpoll()
 
 void epollHandle::addEpollSocket(int fd)
 {
-	if(SetSocketNonblocking(fd) == magicnum::FAILED)
+	if(SetSocketNonblocking(fd) == CFAILED)
 	{
 		error_normal("handleEpollSocket::addEpollSocket");
 		return;

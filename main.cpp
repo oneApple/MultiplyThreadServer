@@ -10,6 +10,7 @@
 int main()
 {
 	threadControl t;
+
 	t.create_threadPool(10);
 	for(;;)
 		pause();

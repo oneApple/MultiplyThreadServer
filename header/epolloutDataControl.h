@@ -7,14 +7,17 @@
 
 #ifndef DATACONTROL_H_
 #define DATACONTROL_H_
-#include<deque>
+
+#include<queue>
+#include<pthread.h>
 
 class epolloutDataControl{
 private:
-	deque<void*> _queData;
+	std::queue<char*> _queData;
+	static pthread_mutex_t lock;
 public:
-	void packData();
-	void DequeData();
+	void packData(char *pdata);
+	char* DequeData();
 };
 
 #endif /* DATACONTROL_H_ */
