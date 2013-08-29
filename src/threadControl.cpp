@@ -9,6 +9,7 @@
 #include<arpa/inet.h>
 #include<stdlib.h>
 #include<pthread.h>
+#include<string.h>
 #include<stdio.h>
 
 #include"threadControl.h"
@@ -16,7 +17,6 @@
 #include"socketFunction.h"
 #include"errorHandle.h"
 #include"configFile.h"
-
 
 
 void threadControl::init_listenFd()
@@ -70,61 +70,63 @@ void *threadControl::thread_fun(void *arg)
 void threadControl::communicateFun()
 {
 	struct epoll_event events[this->_maxNumOfEpollfd + 1];
-	int connfd;
 	int readbytes;
-	char readbuf[magicnum::epollhandle::MAXNUMFD];
+	char readbuf[magicnum::threadcontrol::MSGHEADSIZE];
 	for(;;)
 	{
 		int nfds;
-		if((nfds=epoll_wait(_epfd,events,this->_maxNumOfEpollfd,magicnum::parentprocess::EPOLLTIMEOUT)) <= 0)
+		if((nfds=epoll_wait(_epfd,events,this->_maxNumOfEpollfd,magicnum::threadcontrol::EPOLLTIMEOUT)) <= 0)
 		{
 			if (errno != EINTR)
 			{
-				std::cerr<<"parentProcess::CommunicationHandle:epoll_wait"<<std::endl;
-				throw std::exception();
+				error_fatal("threadControl::communicateFun::epoll_wait");
 			}
 			continue;
 		}
 		int i;
 		for(i=0;i<nfds;i++)
 		{
-			if(events[i].data.fd == this->_netListenfd)
+			int _eventfd = events[i].data.fd;
+			if(_eventfd == this->_netListenfd)
 			{
+				int connfd;
 				struct sockaddr_in clientaddr;
 				socklen_t clilen = sizeof(clientaddr);
 				if((connfd=accept(this->_netListenfd,(struct sockaddr*)&clientaddr,&clilen))<0)
 				{
 					if(errno == EINTR){continue;}
-					std::cerr<<"parentProcess::CommunicationHandle:accept"<<std::endl;
-					throw std::exception();
+					error_fatal("threadControl::communicateFun::accept");
 				}
-				this->acceptNewConnection(connfd);
+				//不要加锁,惊群效率高
+				epollHandle::addEpollSocket(connfd);
 				continue;
 			}
 			else if(events[i].events&EPOLLIN)
 			{
-				memset(readbuf,0,magicnum::MSGHEADSIZE);
-				int _childSocketfd = events[i].data.fd;
-				if((readbytes=RepeatRecv(_childSocketfd,readbuf,sizeof(commontype::headInfo))) == magicnum::FAILIED)
+				memset(readbuf,0,magicnum::threadcontrol::MSGHEADSIZE);
+				if((readbytes=recv(_eventfd,readbuf,magicnum::threadcontrol::MSGHEADSIZE,0)) < 0)
 				{
-					this->relEpollSocket(_childSocketfd,ERR);
+					error_normal("threadControl::communicateFun::recv");
+					//关闭或出错
 					continue;
 				}
-				messageHandle::getInstance()->msgHandle(readbuf,_childSocketfd,this);
+
+				msghead *phead = (msghead*)readbuf;
+				if((readbytes=recv(_eventfd,readbuf,phead->msgbodysize,0)) < 0)
+				{
+					error_normal("threadControl::communicateFun::recv");
+					continue;
+				}
+				//消息处理;
 			}
 			else if(events[i].events&EPOLLOUT)
 			{
 				//通知的顺序与投递的顺序相同
-				handleEpollSocket::sendData(events[i].data.fd);
-				if(this->_dnewConnectSocket.size() != 0)
-				{
-					this->sendNewConnection(events[i].data.fd);
-				}
-				handleEpollSocket::modEpollSocket(events[i].data.fd,false);
+				epollHandle::modEpollSocket(_eventfd,REVENT);
 			}
 			else if((events[i].events&EPOLLHUP)||(events[i].events&EPOLLERR))
 			{
-				this->relEpollSocket(events[i].data.fd,ERR);
+				epollHandle::delEpollSocket(_eventfd);
 			}
 		}
 	}

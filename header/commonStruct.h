@@ -8,7 +8,16 @@
 #ifndef COMMONSTRUCT_H_
 #define COMMONSTRUCT_H_
 
-enum epollEvent{WEVENT = 1,REVENT};
-typedef enum epollEvent enumEpollEvent;
+#include</usr/include/linux/types.h>
+
+enum _epollEvent{WEVENT = 1,REVENT};
+typedef enum _epollEvent enumEpollEvent;
+
+struct _msghead{
+	size_t msgtype;
+	size_t msgbodysize;
+};
+typedef struct _msghead msghead;
+
 
 #endif /* COMMONSTRUCT_H_ */

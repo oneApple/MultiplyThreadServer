@@ -8,8 +8,7 @@
 #ifndef MAGICNUM_H_
 #define MAGICNUM_H_
 
-//#define SYSPATH "/usr/src/linux-headers-3.2.0-51/include/linux"
-#include</usr/include/linux/types.h>
+#include"commonStruct.h"
 //魔法数一定不要直接使用
 
 #define CSUCCESS 0
@@ -27,6 +26,12 @@ const ssize_t FAILED = -1;
 namespace epollhandle{
 const size_t MAXNUMFD = 2048;
 const ssize_t MAXLISTENT = 10;
+};
+
+namespace threadcontrol{
+const size_t LISTENBLOCKNUM = 10;
+const ssize_t EPOLLTIMEOUT = -1;
+const ssize_t MSGHEADSIZE = sizeof(msghead);
 };
 
 };
